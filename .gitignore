@@ -1,0 +1,5 @@
+data
+checkpoints/*.pt
+sam2_configs/*.yaml
+
+.idea
