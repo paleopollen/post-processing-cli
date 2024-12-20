@@ -3,3 +3,8 @@ checkpoints/*.pt
 sam2_configs/*.yaml
 
 .idea
+
+*.pyc
+
+.venv/
+venv/

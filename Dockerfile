@@ -15,11 +15,16 @@ RUN python3 -m venv .venv && . .venv/bin/activate
 
 RUN pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt
 
-RUN git clone https://github.com/facebookresearch/sam2.git && cd sam2 && pip install -e . && cd ..
+RUN git clone https://github.com/facebookresearch/sam2.git \
+    && cd sam2 \
+    && git reset --hard c2ec8e14a185632b0a5d8b161928ceb50197eddc \
+    && pip install -e . \
+    && cd .. \
+    && export SAM2_REPO_ROOT=/usr/src/app/sam2 \
+    && export PYTHONPATH="${SAM2_REPO_ROOT}:${PYTHONPATH}"
 
-RUN export SAM2_REPO_ROOT=/usr/src/app/segment-anything-2
-RUN export PYTHONPATH="${SAM2_REPO_ROOT}:${PYTHONPATH}"
+COPY src/ /usr/src/app/post-processing-cli/
 
-COPY src/ /usr/src/app/
+WORKDIR /usr/src/app/post-processing-cli/
 
 ENTRYPOINT [ "python3", "post_processing_cli.py"]

@@ -3,11 +3,18 @@ import json
 import cv2 as cv
 import numpy as np
 import logging
+import matplotlib
+
+# Set matplotlib backend to Agg to avoid GUI
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 
 import hydra
 import torch
 from sam2.build_sam import build_sam2
 from sam2.sam2_image_predictor import SAM2ImagePredictor
+from PIL import Image
+from utils import segmentation_utils
 
 
 class PostProcessor:
@@ -124,12 +131,12 @@ class PostProcessor:
             )
 
         checkpoint = self.sam2_model_path
-        model_cfg = self.sam2_config_path
+        model_cfg = "configs/sam2/sam2_hiera_l.yaml"
 
         # clear the global hydra state
-        hydra.core.global_hydra.GlobalHydra.instance().clear()
-        self.logger.info(os.path.dirname(model_cfg))
-        hydra.initialize_config_module(os.path.dirname(model_cfg), version_base='1.2')
+        # hydra.core.global_hydra.GlobalHydra.instance().clear()
+        # self.logger.info(os.path.dirname(model_cfg))
+        # hydra.initialize_config_module(os.path.dirname(model_cfg), version_base='1.2')
 
         predictor = SAM2ImagePredictor(build_sam2(model_cfg, checkpoint, device=device))
 
@@ -138,21 +145,45 @@ class PostProcessor:
             with open(metadata_file_path, 'r') as metadata_file:
                 metadata = json.load(metadata_file)
                 in_focus_image_path = os.path.join(self.detections_dir_root_path, directory, metadata["in_focus_image"])
-                img = cv.imread(in_focus_image_path, cv.IMREAD_GRAYSCALE)
+                logging.info("Segmenting image: " + in_focus_image_path)
+                # img = cv.imread(in_focus_image_path, cv.IMREAD_GRAYSCALE)
                 # find image size
-                height, width = img.shape
                 if os.path.exists(in_focus_image_path):
-                    predictor.set_image(in_focus_image_path)
-                    input_point = np.array([[int(height/2), int(width/2)]])
-                    masks, _, _ = predictor.predict(input_point)
-                    # save the mask
-                    mask = masks[0]
-                    mask = mask * 255
-                    mask = mask.astype(np.uint8)
-                    mask = cv.resize(mask, (width, height), interpolation=cv.INTER_NEAREST)
-                    mask_path = os.path.join(self.detections_dir_root_path, directory, "sam2_segmentation_mask.png")
-                    cv.imwrite(mask_path, mask)
-                    self.update_metadata(metadata_file_path, {"sam2_segmentation_mask": "sam2_segmentation_mask.png"})
+                    with Image.open(in_focus_image_path) as img:
+                        img = np.array(img.convert("RGB"))
+                        height, width, _ = img.shape
+                        predictor.set_image(img)
+                        input_point = np.array([[int(height/2), int(width/2)]])
+                        input_label = np.array([1])
+                        masks, scores, _ = predictor.predict(point_coords=input_point, point_labels=input_label, multimask_output=True)
+                        # save the mask
+                        mask = masks[0]
+                        mask = mask * 255
+                        mask = mask.astype(np.uint8)
+                        mask = cv.resize(mask, (width, height), interpolation=cv.INTER_NEAREST)
+                        mask_path = os.path.join(self.detections_dir_root_path, directory, "sam2_segmentation_mask.png")
+                        cv.imwrite(mask_path, mask)
+                        self.update_metadata(metadata_file_path, {"sam2_segmentation_mask": "sam2_segmentation_mask.png"})
+
+                        # save the prompt image
+                        plt.figure(figsize=(10, 10))
+                        plt.imshow(img)
+                        segmentation_utils.show_points(input_point, input_label, plt.gca())
+                        plt.axis('on')
+                        plt.savefig(os.path.join(self.detections_dir_root_path, directory, "sam2_segmentation_prompt_image.png"))
+                        plt.show()
+                        plt.close()
+
+                        mask = masks[:1]
+                        score = scores[:1]
+                        inverted_mask, inverted_dilated_mask = segmentation_utils.perform_dilation(mask, score)
+
+                        # save the image after applying segmentation mask
+                        segmentation_utils.show_masks(img, inverted_mask, score, point_coords=input_point, input_labels=input_label, borders=True, save=True, filepath=os.path.join(self.detections_dir_root_path, directory, "sam2_segmentation_mask_applied.png"))
+
+                        # save the image after applying segmentation mask and dilation
+                        segmentation_utils.show_masks(img, inverted_dilated_mask, score, point_coords=input_point, input_labels=input_label, borders=True, save=True, filepath=os.path.join(self.detections_dir_root_path, directory, "sam2_segmentation_mask_applied_after_dilation.png"))
+
     def run(self):
         self.logger.info('Running post processing')
         self.update_detection_directories_list()
