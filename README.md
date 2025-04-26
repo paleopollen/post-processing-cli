@@ -26,7 +26,7 @@ To install the package using Docker, run the following commands:
 ### Build Docker Image
 
 ```bash
-docker build -t palyim-post-processing-cli .
+docker build -t post-processing-cli .
 ```
 
 ### Run CLI
@@ -34,7 +34,7 @@ docker build -t palyim-post-processing-cli .
 Example command:
 
 ```bash
-docker run -it --rm -v $(pwd)/data:/data -v $(pwd)/checkpoints:/usr/src/app/checkpoints -v $(pwd)/sam2_configs:/usr/src/app/sam2_configs palyim-post-processing-cli -d /data/pollen-detections-dir -m /usr/src/app/checkpoints/sam2_hiera_large.pt -c /usr/src/app/sam2_configs/sam2_hiera_l.yaml
+docker run -it --rm -v $(pwd)/data:/data -v $(pwd)/checkpoints:/usr/src/app/checkpoints -v $(pwd)/sam2_configs:/usr/src/app/sam2_configs post-processing-cli -d /data/pollen-detections-dir -m /usr/src/app/checkpoints/sam2_hiera_large.pt -c /usr/src/app/sam2_configs/sam2_hiera_l.yaml
 ```
 
 Here, CLI arguments `-d` contains the path to the directory containing the pollen detection images, `-m` contains the
@@ -79,7 +79,7 @@ pollen-detections-dir
 ```shell
 usage: post_processing_cli.py [-h] --detections-dir [DETECTIONS_DIR_PATH] --sam2-model-path [SAM2_MODEL_PATH] --sam2-config-path [SAM2_CONFIG_PATH]
 
-Post process the pollen detection results.
+Post-process the pollen detection results.
 
 options:
   -h, --help            show this help message and exit
