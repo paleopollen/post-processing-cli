@@ -1,5 +1,7 @@
 # A Command Line Interface for Basic Post-Processing of Pollen Detection Images Using Segment Anything Model 2 (SAM 2).
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.15285825.svg)](https://doi.org/10.5281/zenodo.15285825)
+
 We present `Pollen Detection Post-processor`, a Command Line Interface (CLI) for basic post-processing of pollen
 detection images generated using our [Pollen Detection CLI](https://github.com/paleopollen/pollen-detection-cli). This
 CLI uses the [Segment Anything Model 2](https://ai.meta.com/sam2/) (SAM 2) model to create segmentation masks and
