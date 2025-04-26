@@ -85,11 +85,17 @@ class PostProcessor:
             img = cv.imread(in_focus_file_path, cv.IMREAD_GRAYSCALE)
             if img is not None:
                 height, width = img.shape
-                if height > self.max_pollen_detection_image_dimension[0] and width > self.max_pollen_detection_image_dimension[1]:
+                if height > self.max_pollen_detection_image_dimension[0] and width > \
+                        self.max_pollen_detection_image_dimension[1]:
                     self.max_pollen_detection_image_dimension = (height, width)
-        self.logger.info("Largest pollen detection image dimension: " +  str(self.max_pollen_detection_image_dimension))
+        self.logger.info("Largest pollen detection image dimension: " + str(self.max_pollen_detection_image_dimension))
 
     def update_detection_directories_list(self):
+        if not os.path.exists(self.detections_dir_root_path):
+            self.logger.error(
+                f"Directory {self.detections_dir_root_path} does not exist. Please provide a valid path and try again.")
+            exit(1)
+
         for root, dirs, _ in os.walk(self.detections_dir_root_path):
             for directory in dirs:
                 self.detections_dirs_path_list.append(directory)
@@ -131,7 +137,9 @@ class PostProcessor:
             )
 
         checkpoint = self.sam2_model_path
-        model_cfg = "configs/sam2/sam2_hiera_l.yaml"
+
+        # TODO: Device a better way to load the model config
+        model_cfg = "configs/sam2/" + os.path.basename(self.sam2_config_path)
 
         # clear the global hydra state
         # hydra.core.global_hydra.GlobalHydra.instance().clear()
@@ -153,9 +161,10 @@ class PostProcessor:
                         img = np.array(img.convert("RGB"))
                         height, width, _ = img.shape
                         predictor.set_image(img)
-                        input_point = np.array([[int(height/2), int(width/2)]])
+                        input_point = np.array([[int(height / 2), int(width / 2)]])
                         input_label = np.array([1])
-                        masks, scores, _ = predictor.predict(point_coords=input_point, point_labels=input_label, multimask_output=True)
+                        masks, scores, _ = predictor.predict(point_coords=input_point, point_labels=input_label,
+                                                             multimask_output=True)
                         # save the mask
                         mask = masks[0]
                         mask = mask * 255
@@ -163,14 +172,16 @@ class PostProcessor:
                         mask = cv.resize(mask, (width, height), interpolation=cv.INTER_NEAREST)
                         mask_path = os.path.join(self.detections_dir_root_path, directory, "sam2_segmentation_mask.png")
                         cv.imwrite(mask_path, mask)
-                        self.update_metadata(metadata_file_path, {"sam2_segmentation_mask": "sam2_segmentation_mask.png"})
+                        self.update_metadata(metadata_file_path,
+                                             {"sam2_segmentation_mask": "sam2_segmentation_mask.png"})
 
                         # save the prompt image
                         plt.figure(figsize=(10, 10))
                         plt.imshow(img)
                         segmentation_utils.show_points(input_point, input_label, plt.gca())
                         plt.axis('on')
-                        plt.savefig(os.path.join(self.detections_dir_root_path, directory, "sam2_segmentation_prompt_image.png"))
+                        plt.savefig(os.path.join(self.detections_dir_root_path, directory,
+                                                 "sam2_segmentation_prompt_image.png"))
                         plt.show()
                         plt.close()
 
@@ -179,10 +190,16 @@ class PostProcessor:
                         inverted_mask, inverted_dilated_mask = segmentation_utils.perform_dilation(mask, score)
 
                         # save the image after applying segmentation mask
-                        segmentation_utils.show_masks(img, inverted_mask, score, point_coords=input_point, input_labels=input_label, borders=True, save=True, filepath=os.path.join(self.detections_dir_root_path, directory, "sam2_segmentation_mask_applied.png"))
+                        segmentation_utils.show_masks(img, inverted_mask, score, point_coords=input_point,
+                                                      input_labels=input_label, borders=True, save=True,
+                                                      filepath=os.path.join(self.detections_dir_root_path, directory,
+                                                                            "sam2_segmentation_mask_applied.png"))
 
                         # save the image after applying segmentation mask and dilation
-                        segmentation_utils.show_masks(img, inverted_dilated_mask, score, point_coords=input_point, input_labels=input_label, borders=True, save=True, filepath=os.path.join(self.detections_dir_root_path, directory, "sam2_segmentation_mask_applied_after_dilation.png"))
+                        segmentation_utils.show_masks(img, inverted_dilated_mask, score, point_coords=input_point,
+                                                      input_labels=input_label, borders=True, save=True,
+                                                      filepath=os.path.join(self.detections_dir_root_path, directory,
+                                                                            "sam2_segmentation_mask_applied_after_dilation.png"))
 
     def run(self):
         self.logger.info('Running post processing')
@@ -204,6 +221,3 @@ class PostProcessor:
         # Use the largest pollen detection image dimension to create a blank image with gray background
         # Create image for clustering by adding an in-focus segmented image to a blank image with gray background
         self.logger.info('Post processing completed')
-
-
-
