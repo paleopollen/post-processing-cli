@@ -23,9 +23,17 @@ cd sam2_configs
 
 To install the package using Docker, run the following commands:
 
+### Build Docker Image
+
 ```bash
 docker build -t palyim-post-processing-cli .
+```
 
+### Run CLI
+
+Example command:
+
+```bash
 docker run -it --rm -v $(pwd)/data:/data -v $(pwd)/checkpoints:/usr/src/app/checkpoints -v $(pwd)/sam2_configs:/usr/src/app/sam2_configs palyim-post-processing-cli -d /data/pollen-detections-dir -m /usr/src/app/checkpoints/sam2_hiera_large.pt -c /usr/src/app/sam2_configs/sam2_hiera_l.yaml
 ```
 
