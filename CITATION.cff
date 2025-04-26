@@ -1,0 +1,43 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: >-
+  A Command Line Interface for post processing pollen
+  detection images using Segment Anything Model 2 (SAM-2).
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Sandeep
+    family-names: Puthanveetil Satheesan
+    affiliation: University of Illinois Urbana-Champaign
+    orcid: 'https://orcid.org/0000-0001-9075-3740'
+  - given-names: Shu
+    family-names: Kong
+    affiliation: University of Macau
+    orcid: 'https://orcid.org/0000-0002-1362-5937'
+  - given-names: Surangi
+    family-names: Punyasena
+    affiliation: University of Illinois Urbana-Champaign
+    orcid: 'https://orcid.org/0000-0003-2110-5840'
+repository-code: 'https://github.com/paleopollen/post-processing-cli'
+abstract: >-
+  We present Pollen Detection Post-processor, a Command Line
+  Interface (CLI) for the post-processing of pollen
+  detection images generated using our [Pollen Detection
+  CLI](https://github.com/paleopollen/pollen-detection-cli).
+  This CLI uses the [Segment Anything Model
+  2](https://ai.meta.com/sam2/) (SAM 2) model to create
+  segmentation masks and segmented pollen images by using
+  the center of pollen detection as the input prompt.
+keywords:
+  - Palynology
+  - Post-processing
+  - Pollen Detection
+  - Segmentation
+  - Microscopy
+license: Apache-2.0
+version: v1.0.0
+date-released: '2025-04-25'
