@@ -1,7 +1,7 @@
 # Pollen Detection Post-processing Command Line Interface
 
 We present Pollen Detection Post-processor, a Command Line Interface (CLI) for the post-processing of pollen detection
-images generated using our Pollen Detection CLI (https://github.com/paleopollen/pollen-detection-cli). This CLI uses
+images generated using our [Pollen Detection CLI](https://github.com/paleopollen/pollen-detection-cli). This CLI uses
 the [Segment Anything Model 2](https://ai.meta.com/sam2/) (SAM 2) model to create segmentation masks and segmented
 pollen images by using the center of pollen detection as the input prompt.
 
@@ -29,8 +29,42 @@ docker build -t palyim-post-processing-cli .
 docker run -it --rm -v $(pwd)/data:/data -v $(pwd)/checkpoints:/usr/src/app/checkpoints -v $(pwd)/sam2_configs:/usr/src/app/sam2_configs palyim-post-processing-cli -d /data/pollen-detections-dir -m /usr/src/app/checkpoints/sam2_hiera_large.pt -c /usr/src/app/sam2_configs/sam2_hiera_l.yaml
 ```
 
-Here, `-d` is the directory containing the pollen detection images, `-m` is the path to the SAM 2 model checkpoint, and
-`-c` is the path to the SAM 2 configuration file. The output will be saved in the same directory as the input images.
+Here, CLI arguments `-d` contains the path to the directory containing the pollen detection images, `-m` contains the
+path to the SAM 2 model checkpoint, and `-c` contains the path to the SAM 2 configuration file. The CLI saves the output
+segmentation masks and images in the same directory as the input detection images and updates the metadata JSON file.
+
+An example directory structure for the input pollen detection images that uses the Pollen Detection CLI is as follows:
+
+This example assumes 9 z-plane images with 256 pixels of overlap between each tile.
+
+```
+pollen-detections-dir
+├── pollen_detection_slide1_0x_0y
+│   ├── 0z.png
+│   ├── 1z.png
+│   ├── 2z.png
+│   ├── 3z.png
+│   ├── 4z.png
+│   ├── 5z.png
+│   ├── 6z.png
+│   ├── 7z.png
+│   ├── 8z.png
+│   ├── mask_1.png
+│   ├── metadata_1.json
+├── pollen_detection_slide1_0x_768y
+│   ├── 0z.png
+│   ├── 1z.png
+│   ├── 2z.png
+│   ├── 3z.png
+│   ├── 4z.png
+│   ├── 5z.png
+│   ├── 6z.png
+│   ├── 7z.png
+│   ├── 8z.png
+│   ├── mask_1.png
+│   ├── metadata_1.json
+└── ...
+```
 
 ## Usage
 
