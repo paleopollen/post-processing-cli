@@ -8,3 +8,5 @@ sam2_configs/*.yaml
 
 .venv/
 venv/
+
+src/sam-2
