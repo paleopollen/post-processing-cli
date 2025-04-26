@@ -13,18 +13,18 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import os
 import json
-import cv2 as cv
-import numpy as np
 import logging
+import os
+
+import cv2 as cv
 import matplotlib
+import numpy as np
 
 # Set matplotlib backend to Agg to avoid GUI
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
-import hydra
 import torch
 from sam2.build_sam import build_sam2
 from sam2.sam2_image_predictor import SAM2ImagePredictor
@@ -169,8 +169,8 @@ class PostProcessor:
                 metadata = json.load(metadata_file)
                 in_focus_image_path = os.path.join(self.detections_dir_root_path, directory, metadata["in_focus_image"])
                 logging.info("Segmenting image: " + in_focus_image_path)
-                # img = cv.imread(in_focus_image_path, cv.IMREAD_GRAYSCALE)
-                # find image size
+
+                # Create and save output segmentation files
                 if os.path.exists(in_focus_image_path):
                     with Image.open(in_focus_image_path) as img:
                         img = np.array(img.convert("RGB"))
@@ -233,6 +233,4 @@ class PostProcessor:
         # Generate segmented in focus images using SAM-2 model
         self.perform_segmentation()
 
-        # Use the largest pollen detection image dimension to create a blank image with gray background
-        # Create image for clustering by adding an in-focus segmented image to a blank image with gray background
         self.logger.info('Post processing completed')

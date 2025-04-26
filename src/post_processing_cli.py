@@ -15,7 +15,6 @@
 
 import argparse
 import logging
-
 from datetime import datetime
 
 from post_processor import PostProcessor
@@ -23,7 +22,7 @@ from post_processor import PostProcessor
 
 class PostProcessingCli:
     def __init__(self, ):
-        self.parser = argparse.ArgumentParser(description="Post process the pollen detection results.")
+        self.parser = argparse.ArgumentParser(description="Post-process the pollen detection results.")
         self.args = None
 
         # Add arguments
